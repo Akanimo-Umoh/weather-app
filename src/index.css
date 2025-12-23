@@ -20,8 +20,8 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
+  /* --color-accent: var(--accent); */
+  /* --color-accent-foreground: var(--accent-foreground); */
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-input: var(--input);
@@ -134,7 +134,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/50 box-border;
   }
   body {
     @apply bg-background text-foreground;
@@ -173,6 +173,10 @@
   @apply font-bg font-bold text-[52px] leading-[120%] text-center;
 }
 
+.text-preset-3 {
+  @apply font-dm font-light text-[32px];
+}
+
 .text-preset-4 {
   @apply font-dm font-bold text-[28px] leading-[120%] text-center;
 }
@@ -182,7 +186,15 @@
 }
 
 .text-preset-6 {
-  @apply font-dm font-medium text-[18px] leading-[120%] text-center opacity-[0.8];
+  @apply font-dm font-medium text-[18px] leading-[120%];
+}
+
+.text-preset-7 {
+  @apply font-dm font-medium text-[16px] leading-[120%];
+}
+
+.text-preset-8 {
+  @apply font-dm font-medium text-[14px] leading-[120%];
 }
 
 .today {
@@ -192,8 +204,29 @@
   background-repeat: no-repeat;
 }
 
+.unit {
+  @apply py-2.5 px-2 rounded-lg flex items-center justify-between cursor-pointer hover:bg-neutral-700;
+}
+
+.active-unit {
+  @apply bg-neutral-700;
+}
+
+.active-day {
+  @apply bg-neutral-700;
+}
+
+.focus:focus {
+  box-shadow: 0px 0px 0px 3px #02012c, 0px 0px 0px 5px #ffffff;
+}
+
+.searchbtn:focus {
+  box-shadow: 0px 0px 0px 3px #02012c, 0px 0px 0px 5px #4658d9;
+}
+
 @media screen and (min-width: 768px) {
   .today {
     background: url("./assets/images/bg-today-large.svg");
+    background-repeat: no-repeat;
   }
 }
