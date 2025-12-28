@@ -1,63 +1,52 @@
-// import axios from "axios";
+// import { fetchWeatherApi } from "openmeteo";
 
-// const WEATHER_BASE_URL =
-//   import.meta.env.VITE_OPEN_METEO_BASE_URL ||
-//   "https://api.open-meteo.com/v1/forecast";
-// const GEOCODING_BASE_URL = "https://geocoding-api.open-meteo.com/v1/search";
+// const params = {
+// 	latitude: 52.52,
+// 	longitude: 13.41,
+// 	hourly: "temperature_2m",
+// };
+// const url = "https://api.open-meteo.com/v1/forecast";
+// const responses = await fetchWeatherApi(url, params);
 
-// export const weatherApi = axios.create({
-//   baseURL: WEATHER_BASE_URL,
-//   timeout: 10000,
-//   headers: {
-//     "Content-Type": "application/json",
-//   },
-// });
+// // Process first location. Add a for-loop for multiple locations or weather models
+// const response = responses[0];
 
-// export const geocodingApi = axios.create({
-//   baseURL: GEOCODING_BASE_URL,
-//   timeout: 10000,
-//   headers: {
-//     "Content-Type": "application/json",
-//   },
-// });
+// // Attributes for timezone and location
+// const latitude = response.latitude();
+// const longitude = response.longitude();
+// const elevation = response.elevation();
+// const utcOffsetSeconds = response.utcOffsetSeconds();
 
-import { fetchWeatherApi } from "openmeteo";
+// console.log(
+// 	`\nCoordinates: ${latitude}°N ${longitude}°E`,
+// 	`\nElevation: ${elevation}m asl`,
+// 	`\nTimezone difference to GMT+0: ${utcOffsetSeconds}s`,
+// );
 
-const params = {
-	latitude: 52.52,
-	longitude: 13.41,
-	hourly: "temperature_2m",
-};
-const url = "https://api.open-meteo.com/v1/forecast";
-const responses = await fetchWeatherApi(url, params);
+// const hourly = response.hourly()!;
 
-// Process first location. Add a for-loop for multiple locations or weather models
-const response = responses[0];
+// // Note: The order of weather variables in the URL query and the indices below need to match!
+// const weatherData = {
+// 	hourly: {
+// 		time: Array.from(
+// 			{ length: (Number(hourly.timeEnd()) - Number(hourly.time())) / hourly.interval() },
+// 			(_, i) => new Date((Number(hourly.time()) + i * hourly.interval() + utcOffsetSeconds) * 1000)
+// 		),
+// 		temperature_2m: hourly.variables(0)!.valuesArray(),
+// 	},
+// };
 
-// Attributes for timezone and location
-const latitude = response.latitude();
-const longitude = response.longitude();
-const elevation = response.elevation();
-const utcOffsetSeconds = response.utcOffsetSeconds();
+// // The 'weatherData' object now contains a simple structure, with arrays of datetimes and weather information
+// console.log("\nHourly data:\n", weatherData.hourly)
 
-console.log(
-	`\nCoordinates: ${latitude}°N ${longitude}°E`,
-	`\nElevation: ${elevation}m asl`,
-	`\nTimezone difference to GMT+0: ${utcOffsetSeconds}s`,
-);
+import axios from "axios";
 
-const hourly = response.hourly()!;
+export const geocodingApi = axios.create({
+  baseURL: "https://geocoding-api.open-meteo.com/v1",
+  timeout: 10000,
+});
 
-// Note: The order of weather variables in the URL query and the indices below need to match!
-const weatherData = {
-	hourly: {
-		time: Array.from(
-			{ length: (Number(hourly.timeEnd()) - Number(hourly.time())) / hourly.interval() }, 
-			(_, i) => new Date((Number(hourly.time()) + i * hourly.interval() + utcOffsetSeconds) * 1000)
-		),
-		temperature_2m: hourly.variables(0)!.valuesArray(),
-	},
-};
-
-// The 'weatherData' object now contains a simple structure, with arrays of datetimes and weather information
-console.log("\nHourly data:\n", weatherData.hourly)
+export const weatherApi = axios.create({
+  baseURL: "https://api.open-meteo.com/v1",
+  timeout: 10000,
+});

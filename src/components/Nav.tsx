@@ -10,7 +10,11 @@ export type UnitsState = {
   precipitation: "mm" | "in";
 };
 
-export default function Nav() {
+export type NavProps = {
+  onUnitsChange?: (units: UnitsState) => void;
+};
+
+export default function Nav({ onUnitsChange }: NavProps) {
   const [toggle, setToggle] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -25,29 +29,6 @@ export default function Nav() {
     unitsState.temperature === "fahrenheit" &&
     unitsState.wind === "mph" &&
     unitsState.precipitation === "in";
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
-        setToggle(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setToggle(false);
-    };
-
-    document.addEventListener("keydown", handleEsc);
-    return () => document.removeEventListener("keydown", handleEsc);
-  }, []);
 
   const unitCategories = [
     {
@@ -76,21 +57,37 @@ export default function Nav() {
     },
   ];
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setToggle(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const toggleUnits = () => {
-    // switch to metric if it is imperial
-    if (isImperial) {
-      setUnitsState({
-        temperature: "celsius",
-        wind: "kmh",
-        precipitation: "mm",
-      });
-    } else {
-      // switch to imperial
-      setUnitsState({
-        temperature: "fahrenheit",
-        wind: "mph",
-        precipitation: "in",
-      });
+    const newUnits: UnitsState = isImperial
+      ? {
+          temperature: "celsius",
+          wind: "kmh",
+          precipitation: "mm",
+        }
+      : {
+          temperature: "fahrenheit",
+          wind: "mph",
+          precipitation: "in",
+        };
+    setUnitsState(newUnits);
+
+    // notify parent component of units change
+    if (onUnitsChange) {
+      onUnitsChange(newUnits);
     }
   };
 
@@ -143,7 +140,6 @@ export default function Nav() {
           ref={triggerRef}
           onClick={() => setToggle((prev) => !prev)}
           onKeyDown={handleKeyDown}
-          tabIndex={0}
           className="w-fit bg-neutral-800 rounded-[6px] flex items-center justify-center gap-1.5 px-2.5 py-2 md:px-4 md:py-3 md:rounded-lg cursor-pointer focus:outline-none focus"
         >
           <img src={units} alt="units" className="w-3.5 h-3.5 md:w-4 md:h-4" />
