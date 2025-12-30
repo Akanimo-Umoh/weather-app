@@ -1,4 +1,4 @@
-import Nav from "./Nav";
+import Nav, { type UnitsState } from "./Nav";
 import Search from "./Search";
 import WeatherDetails from "./WeatherDetails";
 import WeatherCard from "./WeatherCard";
@@ -6,7 +6,16 @@ import Forecast from "./Forecast";
 import HourlyForecast from "./HourlyForecast";
 import { useEffect, useState } from "react";
 import type { WeatherResponse } from "@/types/weather";
-import { weatherApi } from "@/services/api";
+import {
+  convertPrecipitation,
+  convertTemperature,
+  convertWindSpeed,
+  defaultLocation,
+  fetchWeather,
+  formatPrecipitation,
+  formatTemperature,
+  formatWindSpeed,
+} from "@/services/weatherService";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -15,31 +24,23 @@ export default function Home() {
     name: string;
     country: string;
   } | null>(null);
-
-  // default location
-  const defaultLocation = {
-    name: "Berlin",
-    country: "Germany",
-    latitude: 52.52437,
-    longitude: 13.41053,
-  };
+  const [units, setUnits] = useState<UnitsState>({
+    temperature: "celsius",
+    wind: "kmh",
+    precipitation: "mm",
+  });
 
   // Fetch weather for default location on mount
   useEffect(() => {
     const fetchDefaultWeather = async () => {
       setIsLoading(true);
       try {
-        const res = await weatherApi.get<WeatherResponse>("/forecast", {
-          params: {
-            latitude: defaultLocation.latitude,
-            longitude: defaultLocation.longitude,
-            current:
-              "temperature_2m,weathercode,windspeed_10m,apparent_temperature,relative_humidity_2m,precipitation",
-            timezone: "auto",
-          },
-        });
+        const weatherData = await fetchWeather(
+          defaultLocation.latitude,
+          defaultLocation.longitude
+        );
 
-        setWeather(res.data);
+        setWeather(weatherData);
         setSelectedLocation({
           name: defaultLocation.name,
           country: defaultLocation.country,
@@ -55,19 +56,25 @@ export default function Home() {
   }, []); // Run only once on mount
 
   // Simulate loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     setIsLoading(false);
+  //   }, 3000);
+  //   return () => clearTimeout(timer);
+  // }, []);
 
   const weatherDetails = [
     {
       title: "Feels Like",
       value: weather
-        ? `${Math.round(weather.current.apparent_temperature)}°`
-        : "18°",
+        ? formatTemperature(
+            convertTemperature(
+              weather.current.apparent_temperature,
+              units.temperature
+            ),
+            units.temperature
+          )
+        : "--",
     },
     {
       title: "Humidity",
@@ -76,12 +83,23 @@ export default function Home() {
     {
       title: "Wind",
       value: weather
-        ? `${Math.round(weather.current.windspeed_10m)} km/h`
+        ? formatWindSpeed(
+            convertWindSpeed(weather.current.windspeed_10m, units.wind),
+            units.wind
+          )
         : "14 km/h",
     },
     {
       title: "Precipitation",
-      value: weather ? `${weather.current.precipitation} mm` : "0 mm",
+      value: weather
+        ? formatPrecipitation(
+            convertPrecipitation(
+              weather.current.precipitation,
+              units.precipitation
+            ),
+            units.precipitation
+          )
+        : "0 mm",
     },
   ];
 
@@ -90,7 +108,7 @@ export default function Home() {
       <div className="w-full max-w-[1216px] mb-12 md:mb-20">
         {/* navbar */}
         <section className="">
-          <Nav />
+          <Nav onUnitsChange={setUnits} />
         </section>
 
         {/* hero */}
@@ -108,6 +126,7 @@ export default function Home() {
               onWeatherFetch={(weatherData, location) => {
                 setWeather(weatherData);
                 setSelectedLocation(location);
+                setIsLoading(false);
               }}
             />
           </div>
@@ -122,6 +141,7 @@ export default function Home() {
                     isLoading={isLoading}
                     weather={weather}
                     location={selectedLocation}
+                    units={units}
                   />
                 </div>
 

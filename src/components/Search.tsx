@@ -1,16 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import search from "../assets/images/icon-search.svg";
 import loadingIcon from "../assets/images/icon-loading.svg";
-import { geocodingApi, weatherApi } from "@/services/api";
-import type { GeocodingResponse, WeatherResponse } from "@/types/weather";
-
-export type Location = {
-  name: string;
-  region?: string;
-  country: string;
-  latitude: number;
-  longitude: number;
-};
+import type { WeatherResponse } from "@/types/weather";
+import {
+  fetchWeather,
+  searchLocations,
+  type Location,
+} from "@/services/weatherService";
 
 export type SearchProps = {
   onWeatherFetch: (
@@ -35,7 +31,9 @@ export default function Search({ onWeatherFetch }: SearchProps) {
 
   // Reusable search function
   const performSearch = async (query: string) => {
-    if (query.trim().length < 2) {
+    const trimmedQuery = query.trim();
+
+    if (trimmedQuery.length < 2) {
       setLocations([]);
       setIsSearching(false);
       return;
@@ -44,28 +42,9 @@ export default function Search({ onWeatherFetch }: SearchProps) {
     setIsSearching(true);
     setShowResults(true);
 
-    try {
-      const res = await geocodingApi.get<GeocodingResponse>("/search", {
-        params: { name: query },
-      });
-
-      const mappedLocations =
-        res.data.results?.map((location) => ({
-          name: location.name,
-          region: location.admin1,
-          country: location.country,
-          latitude: location.latitude,
-          longitude: location.longitude,
-        })) ?? [];
-
-      setLocations(mappedLocations);
-      // console.log(mappedLocations);
-    } catch (error) {
-      console.error("Geocoding error:", error);
-      setLocations([]);
-    } finally {
-      setIsSearching(false);
-    }
+    const results = await searchLocations(trimmedQuery);
+    setLocations(results);
+    setIsSearching(false);
   };
 
   // useEffect for debounced auto-search
@@ -79,13 +58,7 @@ export default function Search({ onWeatherFetch }: SearchProps) {
       clearTimeout(searchTimeoutRef.current);
     }
 
-    if (searchQuery.trim().length < 2) {
-      setLocations([]);
-      setIsSearching(false);
-      return;
-    }
-
-    // Debounce the search
+    // handle empty queries
     searchTimeoutRef.current = window.setTimeout(() => {
       performSearch(searchQuery);
     }, 500);
@@ -166,20 +139,6 @@ export default function Search({ onWeatherFetch }: SearchProps) {
     setShowResults(true);
   };
 
-  const fetchWeather = async (lat: number, lon: number) => {
-    const res = await weatherApi.get<WeatherResponse>("/forecast", {
-      params: {
-        latitude: lat,
-        longitude: lon,
-        current:
-          "temperature_2m,weathercode,windspeed_10m,apparent_temperature,relative_humidity_2m,precipitation",
-        timezone: "auto",
-      },
-    });
-
-    return res.data;
-  };
-
   const handleSelectionLocation = async (location: Location) => {
     isSelectingRef.current = true;
 
@@ -190,19 +149,19 @@ export default function Search({ onWeatherFetch }: SearchProps) {
 
     setSearchQuery(location.name);
     setShowResults(false);
+    try {
+      const weatherData = await fetchWeather(
+        location.latitude,
+        location.longitude
+      );
 
-    const weatherData = await fetchWeather(
-      location.latitude,
-      location.longitude
-    );
-
-    onWeatherFetch(weatherData, {
-      name: location.name,
-      country: location.country,
-    });
-    console.log("Current Weather:", weatherData);
-
-    // setWeather(currentWeather);
+      onWeatherFetch(weatherData, {
+        name: location.name,
+        country: location.country,
+      });
+    } catch (error) {
+      console.error("Error fetching weather:", error);
+    }
   };
 
   return (

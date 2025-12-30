@@ -5,6 +5,7 @@ import snow from "../assets/images/icon-snow.webp";
 import fog from "../assets/images/icon-fog.webp";
 import cloudy from "../assets/images/icon-partly-cloudy.webp";
 import drizzle from "../assets/images/icon-drizzle.webp";
+import overcast from "../assets/images/icon-overcast.webp";
 import ForecastSkeleton from "./skeletons/ForecastSkeleton";
 
 export default function Forecast({ isLoading = false }) {
