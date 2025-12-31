@@ -18,3 +18,24 @@ export type WeatherResponse = {
     precipitation: number;
   };
 };
+
+export type DailyForecast = {
+  latitude: number;
+  longitude: number;
+  daily: {
+    time: string[];
+    temperature_2m_min: number[];
+    temperature_2m_max: number[];
+    weather_code: number[];
+  };
+};
+
+export type HourlyForecast = {
+  latitude: number;
+  longitude: number;
+  hourly: {
+    time: string[];
+    temperature_2m: number[];
+    weather_code: number[];
+  };
+};

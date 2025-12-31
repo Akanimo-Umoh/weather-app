@@ -1,5 +1,11 @@
+import type { UnitsState } from "@/components/Nav";
 import { geocodingApi, weatherApi } from "./api";
-import type { GeocodingResponse, WeatherResponse } from "@/types/weather";
+import type {
+  DailyForecast,
+  GeocodingResponse,
+  HourlyForecast,
+  WeatherResponse,
+} from "@/types/weather";
 
 export type Location = {
   name: string;
@@ -7,6 +13,34 @@ export type Location = {
   country: string;
   latitude: number;
   longitude: number;
+};
+
+// Define types for API params
+export type WeatherApiParams = {
+  latitude: number;
+  longitude: number;
+  current: string;
+  timezone: string;
+  temperature_unit?: string;
+  wind_speed_unit?: string;
+  precipitation_unit?: string;
+};
+
+export type DailyForecastApiParams = {
+  latitude: number;
+  longitude: number;
+  daily: string;
+  timezone: string;
+  temperature_unit?: string;
+};
+
+export type HourlyForecastApiParams = {
+  latitude: number;
+  longitude: number;
+  hourly: string;
+  timezone: string;
+  temperature_unit?: string;
+  forecast_days?: number;
 };
 
 /**
@@ -43,18 +77,33 @@ export const searchLocations = async (query: string): Promise<Location[]> => {
  */
 export const fetchWeather = async (
   latitude: number,
-  longitude: number
+  longitude: number,
+  units?: UnitsState
 ): Promise<WeatherResponse> => {
-  const res = await weatherApi.get<WeatherResponse>("/forecast", {
-    params: {
-      latitude,
-      longitude,
-      current:
-        "temperature_2m,weathercode,windspeed_10m,apparent_temperature,relative_humidity_2m,precipitation",
-      timezone: "auto",
-    },
-  });
+  const params: WeatherApiParams = {
+    latitude,
+    longitude,
+    current:
+      "temperature_2m,weathercode,windspeed_10m,apparent_temperature,relative_humidity_2m,precipitation",
+    timezone: "auto",
+  };
 
+  // add unit parameters based on selected units
+  if (units) {
+    if (units.temperature === "fahrenheit") {
+      params.temperature_unit = "fahrenheit";
+    }
+    if (units.wind === "mph") {
+      params.wind_speed_unit = "mph";
+    }
+    if (units.precipitation === "in") {
+      params.precipitation_unit = "inch";
+    }
+  }
+
+  const res = await weatherApi.get<WeatherResponse>("/forecast", { params });
+
+  console.log(res.data);
   return res.data;
 };
 
@@ -68,61 +117,72 @@ export const defaultLocation = {
   longitude: 13.41053,
 };
 
-// Convert temperature based on units
-export const convertTemperature = (
-  celsius: number,
-  unit: "celsius" | "fahrenheit"
-): number => {
-  if (unit === "fahrenheit") {
-    return (celsius * 9) / 5 + 32;
+/**
+ * Get unit symbol for temperature
+ */
+export const getTemperatureUnit = (unit: "celsius" | "fahrenheit"): string => {
+  return unit === "celsius" ? "°C" : "°F";
+};
+
+/**
+ * Get unit symbol for wind speed
+ */
+export const getWindSpeedUnit = (unit: "kmh" | "mph"): string => {
+  return unit === "kmh" ? "km/h" : "mph";
+};
+
+/**
+ * Get unit symbol for precipitation
+ */
+export const getPrecipitationUnit = (unit: "mm" | "in"): string => {
+  return unit === "mm" ? "mm" : "in";
+};
+
+// fetch daily forecast
+export const fetchDailyForecast = async (
+  latitude: number,
+  longitude: number,
+  units?: UnitsState
+): Promise<DailyForecast> => {
+  const params: DailyForecastApiParams = {
+    latitude,
+    longitude,
+    daily: "temperature_2m_min,temperature_2m_max,weather_code",
+    timezone: "auto",
+  };
+
+  // add unit parameters based on selected units
+  if (units) {
+    if (units.temperature === "fahrenheit") {
+      params.temperature_unit = "fahrenheit";
+    }
   }
-  return celsius;
+
+  const res = await weatherApi.get<DailyForecast>("/forecast", { params });
+  return res.data;
 };
 
-/**
- * Convert wind speed based on units
- */
-export const convertWindSpeed = (kmh: number, unit: "kmh" | "mph"): number => {
-  if (unit === "mph") {
-    return kmh * 0.621371;
+// fetch hourly forecast
+export const fetchHourlyForecast = async (
+  latitude: number,
+  longitude: number,
+  units?: UnitsState
+): Promise<HourlyForecast> => {
+  const params: HourlyForecastApiParams = {
+    latitude,
+    longitude,
+    hourly: "temperature_2m,weather_code",
+    timezone: "auto",
+    forecast_days: 7,
+  };
+
+  // add units parameters
+  if (units) {
+    if (units.temperature === "fahrenheit") {
+      params.temperature_unit = "fahrenheit";
+    }
   }
-  return kmh;
-};
 
-/**
- * Convert precipitation based on units
- */
-export const convertPrecipitation = (mm: number, unit: "mm" | "in"): number => {
-  if (unit === "in") {
-    return mm * 0.0393701;
-  }
-  return mm;
-};
-
-/**
- * Format temperature with unit symbol
- */
-export const formatTemperature = (
-  value: number,
-  unit: "celsius" | "fahrenheit"
-): string => {
-  const symbol = unit === "celsius" ? "°C" : "°F";
-  return `${Math.round(value)}${symbol}`;
-};
-
-/**
- * Format wind speed with unit
- */
-export const formatWindSpeed = (value: number, unit: "kmh" | "mph"): string => {
-  return `${Math.round(value)} ${unit === "kmh" ? "km/h" : "mph"}`;
-};
-
-/**
- * Format precipitation with unit
- */
-export const formatPrecipitation = (
-  value: number,
-  unit: "mm" | "in"
-): string => {
-  return `${value.toFixed(1)} ${unit}`;
+  const res = await weatherApi.get<HourlyForecast>("/forecast", { params });
+  return res.data;
 };

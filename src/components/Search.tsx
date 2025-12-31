@@ -1,21 +1,36 @@
 import { useEffect, useRef, useState } from "react";
 import search from "../assets/images/icon-search.svg";
 import loadingIcon from "../assets/images/icon-loading.svg";
-import type { WeatherResponse } from "@/types/weather";
+import type {
+  DailyForecast,
+  HourlyForecast as HourlyForecastType,
+  WeatherResponse,
+} from "@/types/weather";
 import {
+  fetchDailyForecast,
+  fetchHourlyForecast,
   fetchWeather,
   searchLocations,
   type Location,
 } from "@/services/weatherService";
+import type { UnitsState } from "./Nav";
 
 export type SearchProps = {
   onWeatherFetch: (
     weather: WeatherResponse,
-    location: { name: string; country: string }
+    forecast: DailyForecast,
+    hourlyForecast: HourlyForecastType,
+    location: {
+      name: string;
+      country: string;
+      latitude: number;
+      longitude: number;
+    }
   ) => void;
+  units: UnitsState;
 };
 
-export default function Search({ onWeatherFetch }: SearchProps) {
+export default function Search({ onWeatherFetch, units }: SearchProps) {
   const [showResults, setShowResults] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -69,21 +84,6 @@ export default function Search({ onWeatherFetch }: SearchProps) {
       }
     };
   }, [searchQuery]);
-
-  // const cities = [
-  //   { city: "City Name" },
-  //   { city: "London" },
-  //   { city: "City Name" },
-  //   { city: "Tokyo" },
-  //   { city: "Paris" },
-  //   { city: "Los Angeles" },
-  //   { city: "Lagos" },
-  // ];
-
-  // // filter cities based on search query
-  // const filteredCitites = cities.filter((city) =>
-  //   city.city.toLowerCase().includes(searchQuery.toLowerCase())
-  // );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!showResults) return;
@@ -149,15 +149,19 @@ export default function Search({ onWeatherFetch }: SearchProps) {
 
     setSearchQuery(location.name);
     setShowResults(false);
-    try {
-      const weatherData = await fetchWeather(
-        location.latitude,
-        location.longitude
-      );
 
-      onWeatherFetch(weatherData, {
+    try {
+      const [weatherData, forecastData, hourlyData] = await Promise.all([
+        fetchWeather(location.latitude, location.longitude, units),
+        fetchDailyForecast(location.latitude, location.longitude, units),
+        fetchHourlyForecast(location.latitude, location.longitude, units),
+      ]);
+
+      onWeatherFetch(weatherData, forecastData, hourlyData, {
         name: location.name,
         country: location.country,
+        latitude: location.latitude,
+        longitude: location.longitude,
       });
     } catch (error) {
       console.error("Error fetching weather:", error);

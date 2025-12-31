@@ -5,24 +5,35 @@ import WeatherCard from "./WeatherCard";
 import Forecast from "./Forecast";
 import HourlyForecast from "./HourlyForecast";
 import { useEffect, useState } from "react";
-import type { WeatherResponse } from "@/types/weather";
 import {
-  convertPrecipitation,
-  convertTemperature,
-  convertWindSpeed,
+  type DailyForecast,
+  type HourlyForecast as HourlyForecastType,
+  type WeatherResponse,
+} from "@/types/weather";
+import {
   defaultLocation,
+  fetchDailyForecast,
+  fetchHourlyForecast,
   fetchWeather,
-  formatPrecipitation,
-  formatTemperature,
-  formatWindSpeed,
+  getPrecipitationUnit,
+  getTemperatureUnit,
+  getWindSpeedUnit,
 } from "@/services/weatherService";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [weather, setWeather] = useState<WeatherResponse | null>(null);
+  const [hourlyForecast, setHourlyForecast] =
+    useState<HourlyForecastType | null>(null);
+
+  const [dailyForecast, setDailyForecast] = useState<DailyForecast | null>(
+    null
+  );
   const [selectedLocation, setSelectedLocation] = useState<{
     name: string;
     country: string;
+    latitude: number;
+    longitude: number;
   } | null>(null);
   const [units, setUnits] = useState<UnitsState>({
     temperature: "celsius",
@@ -35,15 +46,32 @@ export default function Home() {
     const fetchDefaultWeather = async () => {
       setIsLoading(true);
       try {
-        const weatherData = await fetchWeather(
-          defaultLocation.latitude,
-          defaultLocation.longitude
-        );
+        const [weatherData, forecastData, hourlyData] = await Promise.all([
+          fetchWeather(
+            defaultLocation.latitude,
+            defaultLocation.longitude,
+            units
+          ),
+          fetchDailyForecast(
+            defaultLocation.latitude,
+            defaultLocation.longitude,
+            units
+          ),
+          fetchHourlyForecast(
+            defaultLocation.latitude,
+            defaultLocation.longitude,
+            units
+          ),
+        ]);
 
         setWeather(weatherData);
+        setDailyForecast(forecastData);
+        setHourlyForecast(hourlyData);
         setSelectedLocation({
           name: defaultLocation.name,
           country: defaultLocation.country,
+          latitude: defaultLocation.latitude,
+          longitude: defaultLocation.longitude,
         });
       } catch (error) {
         console.error("Error fetching default weather:", error);
@@ -53,28 +81,54 @@ export default function Home() {
     };
 
     fetchDefaultWeather();
-  }, []); // Run only once on mount
+  }, []);
 
-  // Simulate loading
-  // useEffect(() => {
-  //   const timer = setTimeout(() => {
-  //     setIsLoading(false);
-  //   }, 3000);
-  //   return () => clearTimeout(timer);
-  // }, []);
+  // Refetch weather when units change
+  useEffect(() => {
+    const refetchWeatherWithNewUnits = async () => {
+      if (selectedLocation) {
+        setIsLoading(true);
+        try {
+          const [weatherData, forecastData, hourlyData] = await Promise.all([
+            fetchWeather(
+              selectedLocation.latitude,
+              selectedLocation.longitude,
+              units
+            ),
+            fetchDailyForecast(
+              selectedLocation.latitude,
+              selectedLocation.longitude,
+              units
+            ),
+            fetchHourlyForecast(
+              selectedLocation.latitude,
+              selectedLocation.longitude,
+              units
+            ),
+          ]);
+
+          setWeather(weatherData);
+          setDailyForecast(forecastData);
+          setHourlyForecast(hourlyData);
+        } catch (error) {
+          console.error("Error fetching weather with new units:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    refetchWeatherWithNewUnits();
+  }, [units]);
 
   const weatherDetails = [
     {
       title: "Feels Like",
       value: weather
-        ? formatTemperature(
-            convertTemperature(
-              weather.current.apparent_temperature,
-              units.temperature
-            ),
-            units.temperature
-          )
-        : "--",
+        ? `${Math.round(
+            weather.current.apparent_temperature
+          )}${getTemperatureUnit(units.temperature)}`
+        : "18°",
     },
     {
       title: "Humidity",
@@ -83,22 +137,17 @@ export default function Home() {
     {
       title: "Wind",
       value: weather
-        ? formatWindSpeed(
-            convertWindSpeed(weather.current.windspeed_10m, units.wind),
+        ? `${Math.round(weather.current.windspeed_10m)} ${getWindSpeedUnit(
             units.wind
-          )
+          )}`
         : "14 km/h",
     },
     {
       title: "Precipitation",
       value: weather
-        ? formatPrecipitation(
-            convertPrecipitation(
-              weather.current.precipitation,
-              units.precipitation
-            ),
+        ? `${weather.current.precipitation} ${getPrecipitationUnit(
             units.precipitation
-          )
+          )}`
         : "0 mm",
     },
   ];
@@ -123,11 +172,19 @@ export default function Home() {
           {/* search container */}
           <div className="lg:w-[656px] mx-auto md:max-w-[800px]">
             <Search
-              onWeatherFetch={(weatherData, location) => {
+              onWeatherFetch={(
+                weatherData,
+                forecastData,
+                hourlyData,
+                location
+              ) => {
                 setWeather(weatherData);
+                setDailyForecast(forecastData);
+                setHourlyForecast(hourlyData);
                 setSelectedLocation(location);
                 setIsLoading(false);
               }}
+              units={units}
             />
           </div>
 
@@ -141,7 +198,6 @@ export default function Home() {
                     isLoading={isLoading}
                     weather={weather}
                     location={selectedLocation}
-                    units={units}
                   />
                 </div>
 
@@ -164,13 +220,13 @@ export default function Home() {
 
               {/* weather forecast */}
               <div className="mt-8 lg:mt-12">
-                <Forecast isLoading={isLoading} />
+                <Forecast isLoading={isLoading} forecast={dailyForecast} />
               </div>
             </div>
 
             {/* side forecast */}
             <div className="xl:w-[384px]">
-              <HourlyForecast isLoading={isLoading} />
+              <HourlyForecast isLoading={isLoading} forecast={hourlyForecast} />
             </div>
           </div>
         </section>
