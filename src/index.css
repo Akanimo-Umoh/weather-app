@@ -237,7 +237,7 @@
   background-color: #9ca3af;
 }
 
-@media screen and (min-width: 768px) {
+@media screen and (min-width: 640px) {
   .today {
     background: url("./assets/images/bg-today-large.svg");
     background-repeat: no-repeat;
