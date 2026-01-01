@@ -224,6 +224,19 @@
   box-shadow: 0px 0px 0px 3px #02012c, 0px 0px 0px 5px #4658d9;
 }
 
+.scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background-color: #6b7280;
+  border-radius: 999px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}
+
 @media screen and (min-width: 768px) {
   .today {
     background: url("./assets/images/bg-today-large.svg");

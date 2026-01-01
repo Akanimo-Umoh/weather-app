@@ -41,6 +41,7 @@ export default function Search({ onWeatherFetch, units }: SearchProps) {
   const searchTimeoutRef = useRef<number | null>(null);
   const ignoreBlurRef = useRef(false);
   const isSelectingRef = useRef(false);
+  const listboxRef = useRef<HTMLDivElement>(null);
 
   const listboxId = "search-listbox";
 
@@ -168,6 +169,17 @@ export default function Search({ onWeatherFetch, units }: SearchProps) {
     }
   };
 
+  useEffect(() => {
+    if (!showResults || !listboxRef.current) return;
+
+    const activeOption = document.getElementById(`option-${selectedIndex}`);
+
+    activeOption?.scrollIntoView({
+      block: "nearest",
+      behavior: "smooth",
+    });
+  }, [selectedIndex, showResults]);
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -213,9 +225,10 @@ export default function Search({ onWeatherFetch, units }: SearchProps) {
         {/* results container */}
         {showResults && (isSearching || locations.length > 0) && (
           <div
+            ref={listboxRef}
             id={listboxId}
             role="listbox"
-            className="bg-neutral-800 border border-neutral-700 rounded-xl p-2 space-y-1 absolute left-0 top-[66px] w-full z-50"
+            className="bg-neutral-800 border border-neutral-700 rounded-xl p-2 space-y-1 absolute left-0 top-[66px] w-full z-50 max-h-[200px] overflow-y-auto scrollbar"
           >
             {isSearching ? (
               <div className="py-2.5 px-2 flex items-center gap-2.5">

@@ -123,8 +123,8 @@ export default function HourlyForecast({
   };
 
   return (
-    <div className="py-5 px-4 bg-neutral-800 rounded-[20px] md:p-6 w-full">
-      <div className="flex items-center justify-between">
+    <div className="py-5 bg-neutral-800 rounded-[20px] w-full md:py-6">
+      <div className="flex items-center justify-between px-4 md:px-6">
         <p className="text-preset-5 text-neutral-0">Hourly forecast</p>
 
         <div ref={dropdownRef} className="relative">
@@ -176,7 +176,7 @@ export default function HourlyForecast({
       {isLoading || !forecast ? (
         <HourlyForecastSkeleton />
       ) : (
-        <div className="mt-4 space-y-4">
+        <div className="mt-4 space-y-4 h-[614px] overflow-y-auto px-4 md:px-6 scrollbar">
           {hourlyData.map((hour, index) => (
             <div
               key={index}
