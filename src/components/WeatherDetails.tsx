@@ -50,7 +50,10 @@ export default function WeatherDetails({
   return (
     <div className="flex flex-wrap gap-4 justify-center md:gap-5 lg:gap-6 xl:justify-start">
       {weatherDetails.map((item) => (
-        <div key={item.title} className="w-[163.5px] md:w-[165px] lg:w-[182px]">
+        <div
+          key={item.title}
+          className="w-[150px] max-w-[163.5px] md:w-[165px] md:max-w-[165px] lg:w-[182px] lg:max-w-[182px]"
+        >
           <div className="flex flex-col gap-6 p-5 rounded-xl bg-neutral-800 border border-neutral-600 h-full">
             <p className="text-preset-6 text-neutral-200">{item.title}</p>
             {isLoading ? (
