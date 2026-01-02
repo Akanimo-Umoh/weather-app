@@ -28,12 +28,16 @@ export type SearchProps = {
     }
   ) => void;
   onLoadingChange: (loading: boolean) => void;
+  onServerError: () => void;
+  onNoResults: () => void;
   units: UnitsState;
 };
 
 export default function Search({
   onWeatherFetch,
   onLoadingChange,
+  onServerError,
+  onNoResults,
   units,
 }: SearchProps) {
   const [showResults, setShowResults] = useState(false);
@@ -60,9 +64,19 @@ export default function Search({
     setIsSearching(true);
     setShowResults(true);
 
-    const results = await searchLocations(trimmedQuery);
-    setLocations(results);
-    setIsSearching(false);
+    try {
+      const results = await searchLocations(trimmedQuery);
+      setLocations(results);
+
+      if (results.length === 0) {
+        onNoResults();
+      }
+    } catch (error) {
+      console.error("Error searching locations:", error);
+      onServerError();
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -151,6 +165,7 @@ export default function Search({
     } catch (error) {
       console.error("Error fetching weather:", error);
       onLoadingChange(false);
+      onServerError();
     }
   };
 
@@ -247,33 +262,6 @@ export default function Search({
                     </p>
                   </div>
                 ))
-              ) : searchQuery.trim() ? (
-                // No results found
-                <div className="flex flex-col items-center justify-center gap-3 py-8">
-                  <div className="w-12 h-12 rounded-full bg-neutral-700 flex items-center justify-center">
-                    <svg
-                      className="w-6 h-6 text-neutral-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                      />
-                    </svg>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-preset-6 text-neutral-0 font-medium">
-                      No results found
-                    </p>
-                    <p className="text-preset-7 text-neutral-400 mt-1">
-                      Try searching for a different city
-                    </p>
-                  </div>
-                </div>
               ) : null}
             </div>
           </div>

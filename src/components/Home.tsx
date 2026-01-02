@@ -17,12 +17,15 @@ import {
   fetchHourlyForecast,
   fetchWeather,
 } from "@/services/weatherService";
+import ServerError from "./ServerError";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [weather, setWeather] = useState<WeatherResponse | null>(null);
   const [hourlyForecast, setHourlyForecast] =
     useState<HourlyForecastType | null>(null);
+  const [hasServerError, setHasServerError] = useState(false);
+  const [hasNoResults, setHasNoResults] = useState(false);
 
   const [dailyForecast, setDailyForecast] = useState<DailyForecast | null>(
     null
@@ -127,80 +130,110 @@ export default function Home() {
           <Nav onUnitsChange={setUnits} />
         </section>
 
-        {/* hero */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="mt-12 px-4 flex items-center justify-center lg:mt-16"
-        >
-          <p className="text-preset-2 max-w-[330px] md:max-w-[482px] lg:max-w-full text-white">
-            How's the sky looking today?
-          </p>
-        </motion.section>
+        {hasServerError ? (
+          <ServerError />
+        ) : (
+          <>
+            {/* hero */}
+            <motion.section
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="mt-12 px-4 flex items-center justify-center lg:mt-16"
+            >
+              <p className="text-preset-2 max-w-[330px] md:max-w-[482px] lg:max-w-full text-white">
+                How's the sky looking today?
+              </p>
+            </motion.section>
 
-        {/* main container */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-          className="mt-12 px-4 md:px-6 lg:mt-16 xl:px-0 space-y-8"
-        >
-          {/* search container */}
-          <div className="lg:w-[656px] mx-auto md:max-w-[800px]">
-            <Search
-              units={units}
-              onLoadingChange={setIsLoading}
-              onWeatherFetch={(
-                weatherData,
-                forecastData,
-                hourlyData,
-                location
-              ) => {
-                setWeather(weatherData);
-                setDailyForecast(forecastData);
-                setHourlyForecast(hourlyData);
-                setSelectedLocation(location);
-                setIsLoading(false);
-              }}
-            />
-          </div>
-
-          {/* weather main ctn */}
-          <div className="space-y-8 xl:flex xl:gap-8">
-            <div className="xl:flex-1 xl:max-w-[800px]">
-              <div>
-                {/* country details */}
-                <div>
-                  <WeatherCard
-                    isLoading={isLoading}
-                    weather={weather}
-                    location={selectedLocation}
-                  />
-                </div>
-
-                {/* weather details */}
-                <div className="mt-5 lg:mt-8">
-                  <WeatherDetails
-                    weather={weather}
-                    units={units}
-                    isLoading={isLoading}
-                  />
-                </div>
+            {/* main container */}
+            <motion.section
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
+              className="mt-12 px-4 md:px-6 lg:mt-16 xl:px-0 space-y-8"
+            >
+              {/* search container */}
+              <div className="lg:w-[656px] mx-auto md:max-w-[800px]">
+                <Search
+                  units={units}
+                  onLoadingChange={setIsLoading}
+                  onServerError={() => {
+                    setHasServerError(true);
+                    setIsLoading(false);
+                  }}
+                  onNoResults={() => {
+                    setHasNoResults(true);
+                  }}
+                  onWeatherFetch={(
+                    weatherData,
+                    forecastData,
+                    hourlyData,
+                    location
+                  ) => {
+                    setHasServerError(false);
+                    setHasNoResults(false);
+                    setWeather(weatherData);
+                    setDailyForecast(forecastData);
+                    setHourlyForecast(hourlyData);
+                    setSelectedLocation(location);
+                    setIsLoading(false);
+                  }}
+                />
               </div>
 
-              {/* weather forecast */}
-              <div className="mt-8 lg:mt-12">
-                <Forecast isLoading={isLoading} forecast={dailyForecast} />
-              </div>
-            </div>
+              {!hasNoResults ? (
+                // weather main ctn
+                <div className="space-y-8 xl:flex xl:gap-8">
+                  <div className="xl:flex-1 xl:max-w-[800px]">
+                    <div>
+                      {/* country details */}
+                      <div>
+                        <WeatherCard
+                          isLoading={isLoading}
+                          weather={weather}
+                          location={selectedLocation}
+                        />
+                      </div>
 
-            {/* side forecast */}
-            <div className="xl:w-[384px]">
-              <HourlyForecast isLoading={isLoading} forecast={hourlyForecast} />
-            </div>
-          </div>
-        </motion.section>
+                      {/* weather details */}
+                      <div className="mt-5 lg:mt-8">
+                        <WeatherDetails
+                          weather={weather}
+                          units={units}
+                          isLoading={isLoading}
+                        />
+                      </div>
+                    </div>
+
+                    {/* weather forecast */}
+                    <div className="mt-8 lg:mt-12">
+                      <Forecast
+                        isLoading={isLoading}
+                        forecast={dailyForecast}
+                      />
+                    </div>
+                  </div>
+
+                  {/* side forecast */}
+                  <div className="xl:w-[384px]">
+                    <HourlyForecast
+                      isLoading={isLoading}
+                      forecast={hourlyForecast}
+                    />
+                  </div>
+                </div>
+              ) : (
+                // No results found
+                <div className="flex flex-col items-center justify-center pt-4">
+                  <p className="text-preset-4 text-neutral-0">
+                    No Search Result found!
+                  </p>
+                </div>
+              )}
+            </motion.section>
+          </>
+        )}
       </div>
     </div>
   );
