@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import HourlyForecastSkeleton from "./skeletons/HourlyForecastSkeleton";
 import type { HourlyForecast as HourlyForecastType } from "@/types/weather";
 import { getWeatherDescription, getWeatherIcon } from "@/services/weatherIcon";
+import { AnimatePresence, motion } from "framer-motion";
 
 export type HourlyForecastProps = {
   isLoading?: boolean;
@@ -143,32 +144,40 @@ export default function HourlyForecast({
             <img src={dropdown} alt="dropdown" className="w-3 h-4.5" />
           </div>
 
-          {toggle && (
-            <div className="absolute right-0 mt-2.5">
-              <div
-                role="listbox"
-                className="w-[214px] rounded-xl p-2 space-y-1 bg-neutral-800 border border-neutral-600"
+          <AnimatePresence>
+            {toggle && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="absolute right-0 mt-2.5"
               >
-                {days.map((day, index) => (
-                  <div
-                    key={index}
-                    role="option"
-                    aria-selected={selectedDayIndex === index}
-                    onClick={() => handleDaySelect(index)}
-                    onMouseEnter={() => setSelectedIndex(index)}
-                    className={`py-2.5 px-2 rounded-lg hover:bg-neutral-700 cursor-pointer ${
-                      selectedIndex === index
-                        ? "active-day"
-                        : "hover:bg-neutral-700"
-                    }
+                <div
+                  role="listbox"
+                  className="w-[214px] rounded-xl p-2 space-y-1 bg-neutral-800 border border-neutral-600"
+                >
+                  {days.map((day, index) => (
+                    <div
+                      key={index}
+                      role="option"
+                      aria-selected={selectedDayIndex === index}
+                      onClick={() => handleDaySelect(index)}
+                      onMouseEnter={() => setSelectedIndex(index)}
+                      className={`py-2.5 px-2 rounded-lg hover:bg-neutral-700 cursor-pointer ${
+                        selectedIndex === index
+                          ? "active-day"
+                          : "hover:bg-neutral-700"
+                      }
                     `}
-                  >
-                    <p className="text-preset-7 text-neutral-0">{day}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+                    >
+                      <p className="text-preset-7 text-neutral-0">{day}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
@@ -176,25 +185,37 @@ export default function HourlyForecast({
       {isLoading || !forecast ? (
         <HourlyForecastSkeleton />
       ) : (
-        <div className="mt-4 space-y-4 h-[610px] overflow-y-auto px-4 md:px-6 scrollbar">
-          {hourlyData.map((hour, index) => (
-            <div
-              key={index}
-              className="bg-neutral-700 border border-neutral-600 py-2.5 pl-3 pr-4 rounded-lg flex items-center justify-between"
-            >
-              <div className="flex items-center justify-center gap-2">
-                <img
-                  src={getWeatherIcon(hour.weathercode)}
-                  alt={getWeatherDescription(hour.weathercode)}
-                  className="w-10 h-10"
-                />
-                <p className="text-preset-5">{hour.time}</p>
-              </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedDayIndex}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="mt-4 space-y-4 h-[610px] overflow-y-auto px-4 md:px-6 scrollbar"
+          >
+            {hourlyData.map((hour, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.03, duration: 0.2 }}
+                className="bg-neutral-700 border border-neutral-600 py-2.5 pl-3 pr-4 rounded-lg flex items-center justify-between"
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <img
+                    src={getWeatherIcon(hour.weathercode)}
+                    alt={getWeatherDescription(hour.weathercode)}
+                    className="w-10 h-10"
+                  />
+                  <p className="text-preset-5">{hour.time}</p>
+                </div>
 
-              <p className="text-preset-7">{Math.round(hour.temperature)}°</p>
-            </div>
-          ))}
-        </div>
+                <p className="text-preset-7">{Math.round(hour.temperature)}°</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </AnimatePresence>
       )}
     </div>
   );

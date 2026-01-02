@@ -5,6 +5,7 @@ import WeatherCard from "./WeatherCard";
 import Forecast from "./Forecast";
 import HourlyForecast from "./HourlyForecast";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import {
   type DailyForecast,
   type HourlyForecast as HourlyForecastType,
@@ -122,19 +123,29 @@ export default function Home() {
     <div className="flex justify-center w-full min-h-svh">
       <div className="w-full max-w-[1216px] mb-12 md:mb-20">
         {/* navbar */}
-        <section className="">
+        <section>
           <Nav onUnitsChange={setUnits} />
         </section>
 
         {/* hero */}
-        <section className="mt-12 px-4 flex items-center justify-center lg:mt-16">
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="mt-12 px-4 flex items-center justify-center lg:mt-16"
+        >
           <p className="text-preset-2 max-w-[330px] md:max-w-[482px] lg:max-w-full text-white">
-            How’s the sky looking today?
+            How's the sky looking today?
           </p>
-        </section>
+        </motion.section>
 
         {/* main container */}
-        <section className="mt-12 px-4 md:px-6 lg:mt-16 xl:px-0 space-y-8">
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
+          className="mt-12 px-4 md:px-6 lg:mt-16 xl:px-0 space-y-8"
+        >
           {/* search container */}
           <div className="lg:w-[656px] mx-auto md:max-w-[800px]">
             <Search
@@ -160,7 +171,7 @@ export default function Home() {
             <div className="xl:flex-1 xl:max-w-[800px]">
               <div>
                 {/* country details */}
-                <div className="">
+                <div>
                   <WeatherCard
                     isLoading={isLoading}
                     weather={weather}
@@ -189,7 +200,7 @@ export default function Home() {
               <HourlyForecast isLoading={isLoading} forecast={hourlyForecast} />
             </div>
           </div>
-        </section>
+        </motion.section>
       </div>
     </div>
   );

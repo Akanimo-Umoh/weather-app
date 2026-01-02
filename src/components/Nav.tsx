@@ -3,6 +3,7 @@ import units from "../assets/images/icon-units.svg";
 import dropdown from "../assets/images/icon-dropdown.svg";
 import check from "../assets/images/icon-checkmark.svg";
 import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export type UnitsState = {
   temperature: "celsius" | "fahrenheit";
@@ -160,53 +161,61 @@ export default function Nav({ onUnitsChange }: NavProps) {
         </div>
 
         {/* units dropdown */}
-        {toggle && (
-          <div className="absolute right-0 mt-2.5 z-50">
-            <div className="w-[214px] py-1.5 px-2 bg-neutral-800 border border-neutral-600 rounded-xl">
-              <p
-                onClick={toggleUnits}
-                onMouseEnter={() => setSelectedIndex(0)}
-                className={`text-preset-7 text-neutral-0 px-2 py-2.5 rounded-lg unit ${
-                  selectedIndex === 0 ? "active-unit border" : ""
-                }`}
-              >
-                {isImperial ? "Switch to Metric" : "Switch to Imperial"}
-              </p>
+        <AnimatePresence>
+          {toggle && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="absolute right-0 mt-2.5 z-50"
+            >
+              <div className="w-[214px] py-1.5 px-2 bg-neutral-800 border border-neutral-600 rounded-xl">
+                <p
+                  onClick={toggleUnits}
+                  onMouseEnter={() => setSelectedIndex(0)}
+                  className={`text-preset-7 text-neutral-0 px-2 py-2.5 rounded-lg unit ${
+                    selectedIndex === 0 ? "active-unit border" : ""
+                  }`}
+                >
+                  {isImperial ? "Switch to Metric" : "Switch to Imperial"}
+                </p>
 
-              {unitCategories.map((category, index) => (
-                <div key={index}>
-                  <div className="flex flex-col gap-2">
-                    <p className="text-preset-8 text-neutral-300 px-2 pt-1.5">
-                      {category.name}
-                    </p>
+                {unitCategories.map((category, index) => (
+                  <div key={index}>
+                    <div className="flex flex-col gap-2">
+                      <p className="text-preset-8 text-neutral-300 px-2 pt-1.5">
+                        {category.name}
+                      </p>
 
-                    <div className="flex flex-col gap-1">
-                      {category.options.map((option) => (
-                        <div
-                          key={option.value}
-                          className={`unit ${
-                            unitsState[category.key] === option.value
-                              ? "active-unit"
-                              : ""
-                          }`}
-                        >
-                          <p className="text-preset-7">{option.label}</p>
-                          {unitsState[category.key] === option.value && (
-                            <img src={check} alt="selected" />
-                          )}
-                        </div>
-                      ))}
+                      <div className="flex flex-col gap-1">
+                        {category.options.map((option) => (
+                          <div
+                            key={option.value}
+                            className={`unit ${
+                              unitsState[category.key] === option.value
+                                ? "active-unit"
+                                : ""
+                            }`}
+                          >
+                            <p className="text-preset-7">{option.label}</p>
+                            {unitsState[category.key] === option.value && (
+                              <img src={check} alt="selected" />
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
 
-                  {index < unitCategories.length - 1 && (
-                    <hr className="border-neutral-600" />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+                    {index < unitCategories.length - 1 && (
+                      <hr className="border-neutral-600" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </nav>
   );
