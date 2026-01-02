@@ -5,13 +5,13 @@ import type {
   DailyForecast,
   HourlyForecast as HourlyForecastType,
   WeatherResponse,
+  Location,
 } from "@/types/weather";
 import {
   fetchDailyForecast,
   fetchHourlyForecast,
   fetchWeather,
   searchLocations,
-  type Location,
 } from "@/services/weatherService";
 import type { UnitsState } from "./Nav";
 
@@ -27,10 +27,15 @@ export type SearchProps = {
       longitude: number;
     }
   ) => void;
+  onLoadingChange: (loading: boolean) => void;
   units: UnitsState;
 };
 
-export default function Search({ onWeatherFetch, units }: SearchProps) {
+export default function Search({
+  onWeatherFetch,
+  onLoadingChange,
+  units,
+}: SearchProps) {
   const [showResults, setShowResults] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -128,6 +133,8 @@ export default function Search({ onWeatherFetch, units }: SearchProps) {
     // clear results after selection
     setLocations([]);
 
+    onLoadingChange(true);
+
     try {
       const [weatherData, forecastData, hourlyData] = await Promise.all([
         fetchWeather(location.latitude, location.longitude, units),
@@ -143,6 +150,7 @@ export default function Search({ onWeatherFetch, units }: SearchProps) {
       });
     } catch (error) {
       console.error("Error fetching weather:", error);
+      onLoadingChange(false);
     }
   };
 

@@ -1,3 +1,39 @@
+export type Location = {
+  name: string;
+  region?: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+};
+
+// Define types for API params
+export type WeatherApiParams = {
+  latitude: number;
+  longitude: number;
+  current: string;
+  timezone: string;
+  temperature_unit?: string;
+  wind_speed_unit?: string;
+  precipitation_unit?: string;
+};
+
+export type DailyForecastApiParams = {
+  latitude: number;
+  longitude: number;
+  daily: string;
+  timezone: string;
+  temperature_unit?: string;
+};
+
+export type HourlyForecastApiParams = {
+  latitude: number;
+  longitude: number;
+  hourly: string;
+  timezone: string;
+  temperature_unit?: string;
+  forecast_days?: number;
+};
+
 export type GeocodingResponse = {
   results: {
     name: string;

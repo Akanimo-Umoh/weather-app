@@ -15,9 +15,6 @@ import {
   fetchDailyForecast,
   fetchHourlyForecast,
   fetchWeather,
-  getPrecipitationUnit,
-  getTemperatureUnit,
-  getWindSpeedUnit,
 } from "@/services/weatherService";
 
 export default function Home() {
@@ -121,37 +118,6 @@ export default function Home() {
     refetchWeatherWithNewUnits();
   }, [units]);
 
-  const weatherDetails = [
-    {
-      title: "Feels Like",
-      value: weather
-        ? `${Math.round(
-            weather.current.apparent_temperature
-          )}${getTemperatureUnit(units.temperature)}`
-        : "18°",
-    },
-    {
-      title: "Humidity",
-      value: weather ? `${weather.current.relative_humidity_2m}%` : "46%",
-    },
-    {
-      title: "Wind",
-      value: weather
-        ? `${Math.round(weather.current.windspeed_10m)} ${getWindSpeedUnit(
-            units.wind
-          )}`
-        : "14 km/h",
-    },
-    {
-      title: "Precipitation",
-      value: weather
-        ? `${weather.current.precipitation} ${getPrecipitationUnit(
-            units.precipitation
-          )}`
-        : "0 mm",
-    },
-  ];
-
   return (
     <div className="flex justify-center w-full min-h-svh">
       <div className="w-full max-w-[1216px] mb-12 md:mb-20">
@@ -172,6 +138,8 @@ export default function Home() {
           {/* search container */}
           <div className="lg:w-[656px] mx-auto md:max-w-[800px]">
             <Search
+              units={units}
+              onLoadingChange={setIsLoading}
               onWeatherFetch={(
                 weatherData,
                 forecastData,
@@ -184,7 +152,6 @@ export default function Home() {
                 setSelectedLocation(location);
                 setIsLoading(false);
               }}
-              units={units}
             />
           </div>
 
@@ -202,19 +169,12 @@ export default function Home() {
                 </div>
 
                 {/* weather details */}
-                <div className="mt-5 flex flex-wrap gap-4 justify-center md:gap-5 lg:gap-6 lg:mt-8 xl:justify-start">
-                  {weatherDetails.map((item) => (
-                    <div
-                      key={item.title}
-                      className="w-[163.5px] md:w-[165px] lg:w-[182px]"
-                    >
-                      <WeatherDetails
-                        title={item.title}
-                        value={item.value}
-                        isLoading={isLoading}
-                      />
-                    </div>
-                  ))}
+                <div className="mt-5 lg:mt-8">
+                  <WeatherDetails
+                    weather={weather}
+                    units={units}
+                    isLoading={isLoading}
+                  />
                 </div>
               </div>
 

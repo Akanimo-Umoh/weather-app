@@ -176,7 +176,7 @@ export default function HourlyForecast({
       {isLoading || !forecast ? (
         <HourlyForecastSkeleton />
       ) : (
-        <div className="mt-4 space-y-4 h-[614px] overflow-y-auto px-4 md:px-6 scrollbar">
+        <div className="mt-4 space-y-4 h-[610px] overflow-y-auto px-4 md:px-6 scrollbar">
           {hourlyData.map((hour, index) => (
             <div
               key={index}

@@ -9,8 +9,6 @@ import overcast from "../assets/images/icon-overcast.webp";
 
 // Map weather codes to icons
 export const getWeatherIcon = (weatherCode: number): string => {
-  // WMO Weather interpretation codes (WW)
-  // https://open-meteo.com/en/docs
   if (weatherCode === 0) return sunny; // Clear sky
   if (weatherCode === 1 || weatherCode === 2) return cloudy; // Mainly clear, partly cloudy
   if (weatherCode === 3) return overcast; // Overcast

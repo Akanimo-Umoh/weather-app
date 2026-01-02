@@ -2,50 +2,16 @@ import type { UnitsState } from "@/components/Nav";
 import { geocodingApi, weatherApi } from "./api";
 import type {
   DailyForecast,
+  DailyForecastApiParams,
   GeocodingResponse,
   HourlyForecast,
+  HourlyForecastApiParams,
+  Location,
+  WeatherApiParams,
   WeatherResponse,
 } from "@/types/weather";
 
-export type Location = {
-  name: string;
-  region?: string;
-  country: string;
-  latitude: number;
-  longitude: number;
-};
-
-// Define types for API params
-export type WeatherApiParams = {
-  latitude: number;
-  longitude: number;
-  current: string;
-  timezone: string;
-  temperature_unit?: string;
-  wind_speed_unit?: string;
-  precipitation_unit?: string;
-};
-
-export type DailyForecastApiParams = {
-  latitude: number;
-  longitude: number;
-  daily: string;
-  timezone: string;
-  temperature_unit?: string;
-};
-
-export type HourlyForecastApiParams = {
-  latitude: number;
-  longitude: number;
-  hourly: string;
-  timezone: string;
-  temperature_unit?: string;
-  forecast_days?: number;
-};
-
-/**
- * Search for locations by name
- */
+// search for locations by name
 export const searchLocations = async (query: string): Promise<Location[]> => {
   if (query.trim().length < 2) {
     return [];
@@ -72,9 +38,7 @@ export const searchLocations = async (query: string): Promise<Location[]> => {
   }
 };
 
-/**
- * Fetch current weather for a location
- */
+// fetch current weather for a location
 export const fetchWeather = async (
   latitude: number,
   longitude: number,
@@ -107,9 +71,7 @@ export const fetchWeather = async (
   return res.data;
 };
 
-/**
- * Default location - Berlin
- */
+// default location - Berlin
 export const defaultLocation = {
   name: "Berlin",
   country: "Germany",
@@ -117,23 +79,17 @@ export const defaultLocation = {
   longitude: 13.41053,
 };
 
-/**
- * Get unit symbol for temperature
- */
+// get unit symbol for temperature
 export const getTemperatureUnit = (unit: "celsius" | "fahrenheit"): string => {
   return unit === "celsius" ? "°C" : "°F";
 };
 
-/**
- * Get unit symbol for wind speed
- */
+// get unit symbol for wind speed
 export const getWindSpeedUnit = (unit: "kmh" | "mph"): string => {
   return unit === "kmh" ? "km/h" : "mph";
 };
 
-/**
- * Get unit symbol for precipitation
- */
+// get unit symbol for precipitation
 export const getPrecipitationUnit = (unit: "mm" | "in"): string => {
   return unit === "mm" ? "mm" : "in";
 };
