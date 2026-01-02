@@ -5,7 +5,7 @@ export default function HourlyForecastSkeleton() {
 
   return (
     // Hourly items skeleton
-    <div className="mt-4 space-y-4">
+    <div className="mt-4 space-y-4 px-4 md:px-6">
       {skeletonItems.map((_, index) => (
         <div
           key={index}
