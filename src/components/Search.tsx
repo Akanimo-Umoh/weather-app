@@ -103,6 +103,7 @@ export default function Search({
           e.preventDefault();
           const selected = locations[selectedIndex];
           handleSelectionLocation(selected);
+          inputRef.current?.blur();
           // console.log("Selected:", selected);
         }
         break;
@@ -248,6 +249,7 @@ export default function Search({
                     onMouseDown={(e) => {
                       e.preventDefault();
                       handleSelectionLocation(location);
+                      inputRef.current?.blur();
                     }}
                     className={`rounded-lg py-2.5 px-2 cursor-pointer ${
                       selectedIndex === index
