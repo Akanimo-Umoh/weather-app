@@ -61,6 +61,9 @@
   /* fonts */
   --font-bg: "Bricolage Grotesque";
   --font-dm: "DM Sans";
+
+  /* breakpoint */
+  --breakpoint-lglg: 67.5rem;
 }
 
 :root {

@@ -35,7 +35,7 @@ export default function WeatherCard({
 
   return (
     <div
-      className={`w-full h-[286px] rounded-[20px] px-6 flex flex-col items-center justify-center gap-4 sm:flex-row md:justify-between mx-auto xl:mx-0 bg-neutral-800 lg:max-w-[800px] ${
+      className={`w-full h-[286px] rounded-[20px] px-6 flex flex-col items-center justify-center gap-4 sm:flex-row md:justify-between mx-auto xl:mx-0 bg-neutral-800 md:max-w-[800px] ${
         !isLoading ? "today" : ""
       }`}
     >

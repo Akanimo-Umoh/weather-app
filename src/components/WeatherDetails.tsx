@@ -24,11 +24,11 @@ export default function WeatherDetails({
         ? `${Math.round(
             weather.current.apparent_temperature
           )}${getTemperatureUnit(units.temperature)}`
-        : "18°",
+        : "--",
     },
     {
       title: "Humidity",
-      value: weather ? `${weather.current.relative_humidity_2m}%` : "46%",
+      value: weather ? `${weather.current.relative_humidity_2m}%` : "--",
     },
     {
       title: "Wind",
@@ -36,7 +36,7 @@ export default function WeatherDetails({
         ? `${Math.round(weather.current.windspeed_10m)} ${getWindSpeedUnit(
             units.wind
           )}`
-        : "14 km/h",
+        : "--",
     },
     {
       title: "Precipitation",
@@ -44,7 +44,7 @@ export default function WeatherDetails({
         ? `${weather.current.precipitation} ${getPrecipitationUnit(
             units.precipitation
           )}`
-        : "0 mm",
+        : "--",
     },
   ];
   return (
@@ -52,7 +52,7 @@ export default function WeatherDetails({
       {weatherDetails.map((item) => (
         <div
           key={item.title}
-          className="w-[150px] max-w-[163.5px] md:w-[165px] md:max-w-[165px] lg:w-[182px] lg:max-w-[182px]"
+          className="w-[150px] lg:max-w-[182px]"
         >
           <div className="flex flex-col gap-6 p-5 rounded-xl bg-neutral-800 border border-neutral-600 h-full">
             <p className="text-preset-6 text-neutral-200">{item.title}</p>

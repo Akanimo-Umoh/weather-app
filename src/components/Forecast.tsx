@@ -25,12 +25,9 @@ export default function Forecast({
       {isLoading || !forecast ? (
         <ForecastSkeleton />
       ) : (
-        <div className="flex flex-wrap gap-4 md:flex-nowrap">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(83px,1fr))] gap-4">
           {forecast.daily.time.map((date, index) => (
-            <div
-              key={index}
-              className="w-[90px] max-w-[103.66px] sm:w-[103.66px] md:w-[103.66px]"
-            >
+            <div key={index} className="max-w-[103.66px]">
               <div className="flex flex-col items-center justify-center gap-4 px-2.5 py-4 rounded-xl bg-neutral-800 border border-neutral-600">
                 <p className="text-preset-6 text-neutral-0">
                   {formatDay(date)}

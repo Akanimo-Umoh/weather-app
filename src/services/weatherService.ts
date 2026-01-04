@@ -67,7 +67,7 @@ export const fetchWeather = async (
 
   const res = await weatherApi.get<WeatherResponse>("/forecast", { params });
 
-  console.log(res.data);
+  // console.log(res.data);
   return res.data;
 };
 

@@ -184,8 +184,8 @@ export default function Home() {
 
               {!hasNoResults ? (
                 // weather main ctn
-                <div className="space-y-8 xl:flex xl:gap-8">
-                  <div className="xl:flex-1 xl:max-w-[800px]">
+                <div className="space-y-8 lglg:flex lglg:justify-between lglg:gap-8">
+                  <div className="lglg:max-w-[800px] lglg:flex-1">
                     <div>
                       {/* country details */}
                       <div>
@@ -207,7 +207,7 @@ export default function Home() {
                     </div>
 
                     {/* weather forecast */}
-                    <div className="mt-8 lg:mt-12">
+                    <div className="mt-8 lg:mt-12 lglg:w-full ">
                       <Forecast
                         isLoading={isLoading}
                         forecast={dailyForecast}
@@ -216,7 +216,7 @@ export default function Home() {
                   </div>
 
                   {/* side forecast */}
-                  <div className="xl:w-[384px]">
+                  <div className="lglg:max-w-[320px] xl:max-w-[384px] lglg:flex-1 w-full">
                     <HourlyForecast
                       isLoading={isLoading}
                       forecast={hourlyForecast}
